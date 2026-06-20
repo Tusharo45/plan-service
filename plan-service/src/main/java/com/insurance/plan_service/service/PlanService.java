@@ -1,24 +1,38 @@
 package com.insurance.plan_service.service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import com.insurance.plan_service.dto.PlanDetailDTO;
+import com.insurance.plan_service.dto.PlanSummaryDTO;
 import com.insurance.plan_service.entity.Plan;
+import com.insurance.plan_service.exception.ResourceNotFoundException;
+import com.insurance.plan_service.mapper.PlanMapper;
 import com.insurance.plan_service.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PlanService {
 
     private final PlanRepository planRepository;
+    private final PlanMapper planMapper;
 
-    public Plan getPlanById(String planId) {
+    // GET /plans/{planId}
+    public PlanDetailDTO getPlanById(String planId) {
 
-        return planRepository.findById(planId)
+        Plan plan = planRepository.findById(planId)
                 .orElseThrow(() ->
-                        new RuntimeException("Plan Not Found"));
+                        new ResourceNotFoundException(
+                                "Plan Not Found With Id : " + planId));
+
+        return planMapper.mapToDetailDTO(plan);
     }
-    public Page<Plan> getAllPlans(
+
+    // GET /plans
+    public List<PlanSummaryDTO> getAllPlans(
             String lob,
             String planType,
             String status,
@@ -29,6 +43,10 @@ public class PlanService {
                         lob,
                         planType,
                         status,
-                        pageable);
+                        pageable)
+                .getContent()
+                .stream()
+                .map(planMapper::mapToSummaryDTO)
+                .collect(Collectors.toList());
     }
 }

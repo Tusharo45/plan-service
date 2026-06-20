@@ -1,11 +1,14 @@
 package com.insurance.plan_service.controller;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import com.insurance.plan_service.entity.Plan;
+
+import com.insurance.plan_service.dto.PlanDetailDTO;
+import com.insurance.plan_service.dto.PlanSummaryDTO;
 import com.insurance.plan_service.service.PlanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/plans")
@@ -13,8 +16,10 @@ import org.springframework.web.bind.annotation.*;
 public class PlanController {
 
     private final PlanService planService;
+
+    // GET /plans
     @GetMapping
-    public Page<Plan> getPlans(
+    public List<PlanSummaryDTO> getPlans(
 
             @RequestParam String lob,
 
@@ -37,8 +42,10 @@ public class PlanController {
                 status,
                 pageable);
     }
+
+    // GET /plans/{planId}
     @GetMapping("/{planId}")
-    public Plan getPlanById(
+    public PlanDetailDTO getPlanById(
             @PathVariable String planId) {
 
         return planService.getPlanById(planId);
