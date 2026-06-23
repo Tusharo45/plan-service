@@ -1,31 +1,31 @@
 package com.insurance.plan_service.controller;
 
-import com.insurance.plan_service.dto.PlanDetailDTO;
-import com.insurance.plan_service.dto.PlanSummaryDTO;
-import com.insurance.plan_service.service.PlanService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.insurance.plan_service.dto.PlanDetailDTO;
+import com.insurance.plan_service.dto.PlanSearchResponseDTO;
+import com.insurance.plan_service.service.PlanService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/plans")
+@RequestMapping("/api/v1/plans")
 @RequiredArgsConstructor
 public class PlanController {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(PlanController.class);
+
     private final PlanService planService;
 
-    // GET /plans
     @GetMapping
-    public List<PlanSummaryDTO> getPlans(
-
-            @RequestParam String lob,
-
-            @RequestParam String planType,
-
-            @RequestParam String status,
+    public PlanSearchResponseDTO getPlans(
 
             @RequestParam(defaultValue = "0")
             int page,
@@ -33,20 +33,21 @@ public class PlanController {
             @RequestParam(defaultValue = "20")
             int size) {
 
-        Pageable pageable =
-                PageRequest.of(page, size);
+        logger.info(
+                "Received request to fetch plans. page={}, size={}",
+                page,
+                size);
 
-        return planService.getAllPlans(
-                lob,
-                planType,
-                status,
-                pageable);
+        return planService.getPlans(page, size);
     }
 
-    // GET /plans/{planId}
     @GetMapping("/{planId}")
     public PlanDetailDTO getPlanById(
-            @PathVariable String planId) {
+            @PathVariable Long planId) {
+
+        logger.info(
+                "Received request for planId={}",
+                planId);
 
         return planService.getPlanById(planId);
     }

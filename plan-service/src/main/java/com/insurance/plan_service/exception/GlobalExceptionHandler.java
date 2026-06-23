@@ -1,5 +1,7 @@
 package com.insurance.plan_service.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,9 +10,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFoundException(
+    private static final Logger logger =
+            LoggerFactory.getLogger(
+                    GlobalExceptionHandler.class);
+
+    @ExceptionHandler(
+            ResourceNotFoundException.class)
+    public ResponseEntity<String>
+    handleResourceNotFoundException(
             ResourceNotFoundException ex) {
+
+        logger.error(
+                "Resource not found: {}",
+                ex.getMessage());
 
         return new ResponseEntity<>(
                 ex.getMessage(),
@@ -18,11 +30,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGenericException(
+    public ResponseEntity<String>
+    handleException(
             Exception ex) {
 
+        logger.error(
+                "Unexpected error occurred",
+                ex);
+
         return new ResponseEntity<>(
-                "Something went wrong: " + ex.getMessage(),
+                "Internal Server Error",
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

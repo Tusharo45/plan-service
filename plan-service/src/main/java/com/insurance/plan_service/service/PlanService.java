@@ -1,52 +1,97 @@
 package com.insurance.plan_service.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.insurance.plan_service.dto.PlanDetailDTO;
+import com.insurance.plan_service.dto.PlanSearchResponseDTO;
 import com.insurance.plan_service.dto.PlanSummaryDTO;
 import com.insurance.plan_service.entity.Plan;
 import com.insurance.plan_service.exception.ResourceNotFoundException;
 import com.insurance.plan_service.mapper.PlanMapper;
 import com.insurance.plan_service.repository.PlanRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PlanService {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(PlanService.class);
+
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
 
-    // GET /plans/{planId}
-    public PlanDetailDTO getPlanById(String planId) {
+    public PlanSearchResponseDTO getPlans(
+            int page,
+            int size) {
 
-        Plan plan = planRepository.findById(planId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Plan Not Found With Id : " + planId));
+        logger.info(
+                "Fetching plans. page={}, size={}",
+                page,
+                size);
 
-        return planMapper.mapToDetailDTO(plan);
+        Pageable pageable =
+                PageRequest.of(page, size);
+
+        Page<Plan> planPage =
+                planRepository.findAll(pageable);
+
+        logger.info(
+                "Found {} plans",
+                planPage.getTotalElements());
+
+        List<PlanSummaryDTO> plans =
+                planPage.getContent()
+                        .stream()
+                        .map(planMapper::mapToSummaryDTO)
+                        .collect(Collectors.toList());
+
+        PlanSearchResponseDTO response =
+                new PlanSearchResponseDTO();
+
+        response.setPage(page);
+        response.setSize(size);
+        response.setTotalCount(
+                planPage.getTotalElements());
+
+        response.setPlans(plans);
+
+        return response;
     }
 
-    // GET /plans
-    public List<PlanSummaryDTO> getAllPlans(
-            String lob,
-            String planType,
-            String status,
-            Pageable pageable) {
+    public PlanDetailDTO getPlanById(
+            Long planId) {
 
-        return planRepository
-                .findByLineOfBusinessAndPlanTypeAndStatus(
-                        lob,
-                        planType,
-                        status,
-                        pageable)
-                .getContent()
-                .stream()
-                .map(planMapper::mapToSummaryDTO)
-                .collect(Collectors.toList());
+        logger.info(
+                "Fetching plan details for planId={}",
+                planId);
+
+        Plan plan =
+                planRepository.findById(planId)
+                        .orElseThrow(() -> {
+
+                            logger.error(
+                                    "Plan not found. planId={}",
+                                    planId);
+
+                            return new ResourceNotFoundException(
+                                    "Plan Not Found With Id : "
+                                            + planId);
+                        });
+
+        logger.info(
+                "Successfully found plan {}",
+                plan.getPlanName());
+
+        return planMapper.mapToDetailDTO(plan);
     }
 }

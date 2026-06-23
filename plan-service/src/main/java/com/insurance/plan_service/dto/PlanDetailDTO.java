@@ -1,13 +1,14 @@
 package com.insurance.plan_service.dto;
 
-import lombok.Data;
-
+import java.time.LocalDate;
 import java.util.List;
+
+import lombok.Data;
 
 @Data
 public class PlanDetailDTO {
 
-    private String planId;
+    private Long planId;
 
     private String planName;
 
@@ -15,25 +16,19 @@ public class PlanDetailDTO {
 
     private String planType;
 
-    private String status;
+    private String networkType;
+
+    private String marketSegment;
+
+    private String state;
+
+    private LocalDate effectiveDate;
+
+    private LocalDate expiryDate;
 
     private Integer memberCount;
 
-    private String networkType;
-
-    private String description;
-
     private String baselineVersion;
 
-    private DeductibleDTO deductible;
-
-    private OutOfPocketMaxDTO outOfPocketMax;
-
-    private CoverageDetailDTO coverageDetails;
-
-    private List<CopayDTO> copays;
-
-    private List<VisitLimitDTO> visitLimits;
-
-    private List<AuthorizationRuleDTO> authorizationRules;
+    private List<PlanBenefitDTO> benefits;
 }

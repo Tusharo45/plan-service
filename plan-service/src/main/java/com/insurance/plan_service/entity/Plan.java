@@ -1,9 +1,11 @@
 package com.insurance.plan_service.entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.CascadeType;
+
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.util.List;
+
 @Entity
 @Table(name = "plans")
 @Getter
@@ -13,45 +15,35 @@ import java.util.List;
 public class Plan {
 
     @Id
-    private String planId;
+    private Long planId;
 
     private String planName;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 
     private String lineOfBusiness;
 
     private String planType;
 
-    private String status;
+    private String networkType;
+
+    private String marketSegment;
+
+    private String state;
 
     private Integer memberCount;
 
-    private String networkType;
-
-    private String description;
-
     private String baselineVersion;
 
-    @OneToOne(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private Deductible deductible;
+    private Integer minLimitAllowed;
 
-    @OneToOne(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private OutOfPocketMax outOfPocketMax;
+    private Integer maxLimitAllowed;
 
-    @OneToOne(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private CoverageDetail coverageDetail;
-
-    @OneToMany(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private List<Copay> copays;
-
-    @OneToMany(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private List<VisitLimit> visitLimits;
-
-    @OneToMany(mappedBy = "plan",
-            cascade = CascadeType.ALL)
-    private List<AuthorizationRule> authorizationRules;
+    @OneToMany(
+            mappedBy = "plan",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<PlanBenefit> benefits;
 }
