@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.insurance.plan_service.dto.ParamsResponseDto;
 import com.insurance.plan_service.dto.PlanDetailDTO;
 import com.insurance.plan_service.dto.PlanSearchResponseDTO;
 import com.insurance.plan_service.service.PlanService;
@@ -24,6 +25,7 @@ public class PlanController {
 
     private final PlanService planService;
 
+    // GET /api/v1/plans
     @GetMapping
     public PlanSearchResponseDTO getPlans(
 
@@ -41,6 +43,7 @@ public class PlanController {
         return planService.getPlans(page, size);
     }
 
+    // GET /api/v1/plans/{planId}
     @GetMapping("/{planId}")
     public PlanDetailDTO getPlanById(
             @PathVariable Long planId) {
@@ -50,5 +53,17 @@ public class PlanController {
                 planId);
 
         return planService.getPlanById(planId);
+    }
+
+    // GET /api/v1/plans/{planId}/params
+    @GetMapping("/{planId}/params")
+    public ParamsResponseDto getEditableParams(
+            @PathVariable Long planId) {
+
+        logger.info(
+                "Received request for editable parameters. planId={}",
+                planId);
+
+        return planService.getEditableParams(planId);
     }
 }

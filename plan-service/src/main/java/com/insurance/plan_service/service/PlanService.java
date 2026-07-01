@@ -10,11 +10,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.insurance.plan_service.dto.ParamDto;
+import com.insurance.plan_service.dto.ParamsResponseDto;
 import com.insurance.plan_service.dto.PlanDetailDTO;
 import com.insurance.plan_service.dto.PlanSearchResponseDTO;
 import com.insurance.plan_service.dto.PlanSummaryDTO;
 import com.insurance.plan_service.entity.Plan;
 import com.insurance.plan_service.exception.ResourceNotFoundException;
+import com.insurance.plan_service.mapper.ParamMapper;
 import com.insurance.plan_service.mapper.PlanMapper;
 import com.insurance.plan_service.repository.PlanRepository;
 
@@ -29,7 +32,9 @@ public class PlanService {
 
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
+    private final ParamMapper paramMapper;
 
+    // GET /api/v1/plans
     public PlanSearchResponseDTO getPlans(
             int page,
             int size) {
@@ -68,6 +73,7 @@ public class PlanService {
         return response;
     }
 
+    // GET /api/v1/plans/{planId}
     public PlanDetailDTO getPlanById(
             Long planId) {
 
@@ -94,4 +100,40 @@ public class PlanService {
 
         return planMapper.mapToDetailDTO(plan);
     }
+
+    // GET /api/v1/plans/{planId}/params
+    public ParamsResponseDto getEditableParams(
+            Long planId) {
+
+        logger.info(
+                "Fetching editable parameters for planId={}",
+                planId);
+
+        Plan plan =
+                planRepository.findById(planId)
+                        .orElseThrow(() -> {
+
+                            logger.error(
+                                    "Plan not found. planId={}",
+                                    planId);
+
+                            return new ResourceNotFoundException(
+                                    "Plan Not Found With Id : "
+                                            + planId);
+                        });
+
+        List<ParamDto> params =
+                paramMapper.mapPlanBenefitsToParams(plan);
+
+        logger.info(
+                "Generated {} editable parameters",
+                params.size());
+
+        return ParamsResponseDto.builder()
+                .planId(plan.getPlanId())
+                .baselineVersion(plan.getBaselineVersion())
+                .params(params)
+                .build();
+    }
+
 }
